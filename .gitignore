@@ -1,0 +1,16 @@
+# Ignorar dados persistentes (Bancos de dados)
+volumes/
+
+# Ignorar certificados e chaves de segurança
+nginx/certificate/
+*.key
+*.crt
+*.pem
+
+# Ignorar arquivos de sistema e IDEs
+.DS_Store
+.idea/
+.vscode/
+
+# Ignorar logs (opcional, mas recomendado)
+*.log
