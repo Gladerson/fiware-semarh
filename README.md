@@ -1,5 +1,5 @@
 # Fase 1: Preparação do Servidor (Debian 13)
-Estes comandos devem ser executados na sua nova VM (172.16.100.250).
+Estes comandos devem ser executados na sua nova VM ([IP_VM_DEBIAN]).
 
 ## 1. Atualizar o Sistema
 
@@ -54,15 +54,15 @@ mkdir -p volumes/crate_data
 ```
 
 ## 5. Gerar o Certificado SSL (Wildcard)
-Esta é a parte mais importante. Vamos criar um único certificado "curinga" (wildcard) que funcionará para todos os nossos subdomínios (ex: fiware-keycloak.semarh.lan, fiware-grafana.semarh.lan, etc.).
+Esta é a parte mais importante. Vamos criar um único certificado "curinga" (wildcard) que funcionará para todos os nossos subdomínios (ex: fiware-keycloak.[SEU_DOMINIO_INTERNO], fiware-grafana.[SEU_DOMINIO_INTERNO], etc.).
 
 ```bash
 cd ~/fiware_stack
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 -keyout nginx/certificate/fiware.key \
 -out nginx/certificate/fiware.crt \
--subj "/CN=semarh.lan" \
--addext "subjectAltName = DNS:*.semarh.lan, DNS:semarh.lan, IP:172.16.100.250"
+-subj "/CN=[SEU_DOMINIO_INTERNO]" \
+-addext "subjectAltName = DNS:*.[SEU_DOMINIO_INTERNO], DNS:[SEU_DOMINIO_INTERNO], IP:[IP_VM_DEBIAN]"
 ```
 
 ## 6. Ajustar Permissões dos Volumes
@@ -117,11 +117,11 @@ Adicione as seguintes linhas no final do arquivo. Elas dizem ao seu computador p
 
 ```bash
 # Acesso Externo ao FIWARE da SEMARH (No computador de casa/fora)
-206.42.28.182 fiware-grafana.semarh.lan
-206.42.28.182 fiware-keycloak.semarh.lan
-206.42.28.182 fiware-orion.semarh.lan
-206.42.28.182 fiware-iot.semarh.lan
-206.42.28.182 fiware-quantumleap.semarh.lan
+[IP_PUBLICO_PFSENSE] fiware-grafana.[SEU_DOMINIO_INTERNO]
+[IP_PUBLICO_PFSENSE] fiware-keycloak.[SEU_DOMINIO_INTERNO]
+[IP_PUBLICO_PFSENSE] fiware-orion.[SEU_DOMINIO_INTERNO]
+[IP_PUBLICO_PFSENSE] fiware-iot.[SEU_DOMINIO_INTERNO]
+[IP_PUBLICO_PFSENSE] fiware-quantumleap.[SEU_DOMINIO_INTERNO]
 ```
 
 Salve o arquivo. Pode ser necessário limpar o cache DNS do seu sistema (no Windows, abra o cmd e digite `ipconfig /flushdns`).
@@ -129,53 +129,53 @@ Salve o arquivo. Pode ser necessário limpar o cache DNS do seu sistema (no Wind
 # Fase 4: Teste os Serviços
 Agora você pode acessar tudo pelas portas padrão https (443). Seu navegador dará um aviso de "Não Seguro" por causa do certificado auto-assinado. Apenas "aceite o risco" e continue.
 
-* Grafana: `https://fiware-grafana.semarh.lan`
-* Keycloak (Admin Console): `https://fiware-keycloak.semarh.lan/admin/`
-* Orion (API): `https://fiware-orion.semarh.lan/v2/entities`
-* IoT Agent (API): `https://fiware-iot.semarh.lan/version` (Deve mostrar a versão)
-* QuantumLeap (API): `https://fiware-quantumleap.semarh.lan/version` (Deve mostrar a versão)
-* Envio de dados do dispositivo IoT: `http://206.42.28.182:7896`
-* Configurar o IoT Agent (criar grupos de serviços, registrar dispositivos): `http://206.42.28.182:4041`
-* Envio de dados do dispositivo IoT com criptografia: `https://fiware-iot.semarh.lan` (precisaria que o dispositivo IoT resolvesse o nome ou houvesse um domínio público)
+* Grafana: `https://fiware-grafana.[SEU_DOMINIO_INTERNO]`
+* Keycloak (Admin Console): `https://fiware-keycloak.[SEU_DOMINIO_INTERNO]/admin/`
+* Orion (API): `https://fiware-orion.[SEU_DOMINIO_INTERNO]/v2/entities`
+* IoT Agent (API): `https://fiware-iot.[SEU_DOMINIO_INTERNO]/version` (Deve mostrar a versão)
+* QuantumLeap (API): `https://fiware-quantumleap.[SEU_DOMINIO_INTERNO]/version` (Deve mostrar a versão)
+* Envio de dados do dispositivo IoT: `http://[IP_PUBLICO_PFSENSE]:7896`
+* Configurar o IoT Agent (criar grupos de serviços, registrar dispositivos): `http://[IP_PUBLICO_PFSENSE]:4041`
+* Envio de dados do dispositivo IoT com criptografia: `https://fiware-iot.[SEU_DOMINIO_INTERNO]` (precisaria que o dispositivo IoT resolvesse o nome ou houvesse um domínio público)
 
 # Fase 5: Configuração de rede para o plano de gerenciamento
 Este tráfego (Grafana, Keycloak) deve passar pelo NGINX na porta 443, usando subdomínios reais.
 
-## Ação 1: Configurar seu DNS Interno (no semarh.lan) No seu servidor DNS (seja ele o pfSense ou um Windows Server), crie os seguintes registros Tipo A:
+## Ação 1: Configurar seu DNS Interno (no [SEU_DOMINIO_INTERNO]) No seu servidor DNS (seja ele o pfSense ou um Windows Server), crie os seguintes registros Tipo A:
 
 ### Passo 1: Configurar no Windows Server (DNS Manager)
 
 1. Acesse seu Windows Server.
 2. Abra o Gerenciador de Servidores (Server Manager), vá em Ferramentas (Tools) e clique em DNS.
 3. Na árvore da esquerda, expanda o nome do servidor e vá em Zonas de Pesquisa Direta (Forward Lookup Zones).
-4. Localize e clique na zona semarh.lan.
+4. Localize e clique na zona [SEU_DOMINIO_INTERNO].
 5. Agora, clique com o botão direito em uma área vazia do lado direito e escolha Novo Host (A ou AAAA)....
 
-Você precisará criar 5 registros, um para cada serviço, todos apontando para o mesmo IP da VM (172.16.100.250).
+Você precisará criar 5 registros, um para cada serviço, todos apontando para o mesmo IP da VM ([IP_VM_DEBIAN]).
 
 #### Registro 1 (Grafana):
-* Nome: fiware-grafana (O campo FQDN preencherá automaticamente para fiware-grafana.semarh.lan)
-* Endereço IP: 172.16.100.250
+* Nome: fiware-grafana (O campo FQDN preencherá automaticamente para fiware-grafana.[SEU_DOMINIO_INTERNO])
+* Endereço IP: [IP_VM_DEBIAN]
 * Clique em Adicionar Host.
 
 #### Registro 2 (Keycloak):
 * Nome: fiware-keycloak
-* Endereço IP: 172.16.100.250
+* Endereço IP: [IP_VM_DEBIAN]
 * Clique em Adicionar Host.
 
 #### Registro 3 (Orion):
 * Nome: fiware-orion
-* Endereço IP: 172.16.100.250
+* Endereço IP: [IP_VM_DEBIAN]
 * Clique em Adicionar Host.
 
 #### Registro 4 (IoT Agent):
 * Nome: fiware-iot
-* Endereço IP: 172.16.100.250
+* Endereço IP: [IP_VM_DEBIAN]
 * Clique em Adicionar Host.
 
 #### Registro 5 (QuantumLeap):
 * Nome: fiware-quantumleap
-* Endereço IP: 172.16.100.250
+* Endereço IP: [IP_VM_DEBIAN]
 * Clique em Adicionar Host.
 
 ### Passo 2: Configurar no PfSense (Opcional, mas Recomendado para a VLAN)
@@ -186,8 +186,8 @@ Se os dispositivos na VLAN 172.16.100.0 usam o PfSense como DNS (e não o Window
 3. Clique em Add.
 
 * Host: fiware-grafana
-* Domain: semarh.lan
-* IP Address: 172.16.100.250
+* Domain: [SEU_DOMINIO_INTERNO]
+* IP Address: [IP_VM_DEBIAN]
 * Description: Fiware Grafana
 * Clique em Save.
 
@@ -207,22 +207,22 @@ ipconfig /flushdns
 3. Teste se o Windows Server está respondendo corretamente com o comando `ping` ou `nslookup`:
 
 ```console
-ping fiware-keycloak.semarh.lan
+ping fiware-keycloak.[SEU_DOMINIO_INTERNO]
 ```
 
-Se responder Disparando contra 172.16.100.250..., está PERFEITO.
+Se responder Disparando contra [IP_VM_DEBIAN]..., está PERFEITO.
 
-Agora você pode acessar `https://fiware-grafana.semarh.lan` e `https://fiware-keycloak.semarh.lan` de qualquer computador dentroda rede interna, sem precisar configurar nada neles!
+Agora você pode acessar `https://fiware-grafana.[SEU_DOMINIO_INTERNO]` e `https://fiware-keycloak.[SEU_DOMINIO_INTERNO]` de qualquer computador dentroda rede interna, sem precisar configurar nada neles!
 
 ## Ação 2: Configurar o pfSense (Acesso Externo de Admin) No pfSense, crie uma regra de NAT Port Forward para o tráfego de gerenciamento:
 
 * Interface: WAN
 * Protocolo: TCP
 * Porta de Destino (WAN): 443 (ou outra de sua escolha, ex: 8443)
-* IP de Redirecionamento (LAN): 172.16.100.250
+* IP de Redirecionamento (LAN): [IP_VM_DEBIAN]
 * Porta de Redirecionamento (LAN): 443
 
-Nota: Para administradores externos acessarem usando o IP público (206.42.28.182), eles ainda precisarão editar seus arquivos hosts. Isso é necessário porque, ao acessarem por IP, o NGINX não saberá qual subdomínio entregar e mostrará apenas o serviço padrão (Grafana).
+Nota: Para administradores externos acessarem usando o IP público ([IP_PUBLICO_PFSENSE]), eles ainda precisarão editar seus arquivos hosts. Isso é necessário porque, ao acessarem por IP, o NGINX não saberá qual subdomínio entregar e mostrará apenas o serviço padrão (Grafana).
 
 # Fase 6: Configuração de rede para o plano de dados (para os dispositivos IoT)
 Aqui está a resposta para sua pergunta: seus dispositivos IoT não devem passar pelo NGINX. Eles devem ter um ponto de entrada dedicado, baseado em IP e porta, que o pfSense redireciona diretamente para o container do IoT Agent.
@@ -234,7 +234,7 @@ Configuração porta HTTP do IoT-Agent:
 * Interface: WAN
 * Protocolo: TCP (ou UDP, dependendo do seu dispositivo)
 * Porta de Destino (WAN): 7896 (porta HTTP do IoT-Agent)
-* IP de Redirecionamento (LAN): 172.16.100.250
+* IP de Redirecionamento (LAN): [IP_VM_DEBIAN]
 * Porta de Redirecionamento (LAN): 7896
 
 Configuração porta API:
@@ -242,7 +242,7 @@ Configuração porta API:
 * Interface: WAN
 * Protocolo: TCP (ou UDP, dependendo do seu dispositivo)
 * Porta de Destino (WAN): 4041 (porta da API)
-* IP de Redirecionamento (LAN): 172.16.100.250
+* IP de Redirecionamento (LAN): [IP_VM_DEBIAN]
 * Porta de Redirecionamento (LAN): 4041
 
 ---
@@ -251,28 +251,28 @@ Configuração porta API:
 
 ## Dados do Cenário (Padrão)
 * Onde executar os comandos curl: No seu computador pessoal (Windows/WSL).
-* Onde executar os comandos de banco: Na VM Debian (172.16.100.250).
+* Onde executar os comandos de banco: Na VM Debian ([IP_VM_DEBIAN]).
 * Service (Tenant): semarh
 * Service Path (Caminho): /barragem01
-* Chave de Segurança (API Key): chave_secreta_123
+* Chave de Segurança (API Key): [SUA_API_KEY] (pode criar na hora)
 * ID do Dispositivo: sensor_teste_final
 
 1. Provisionamento (Configurar o Terreno)
 Antes de ligar o sensor, precisamos ensinar o sistema a recebê-lo.
 
 1.1. Criar Grupo de Serviços (IoT Agent)
-Define que qualquer sensor que envie a chave chave_secreta_123 pertence ao serviço semarh.
+Define que qualquer sensor que envie a chave [SUA_API_KEY] pertence ao serviço semarh.
 
 ```bash
 curl -iX POST \
-  'http://172.16.100.250:4041/iot/services' \
+  'http://[IP_VM_DEBIAN]:4041/iot/services' \
   -H 'Content-Type: application/json' \
   -H 'fiware-service: semarh' \
   -H 'fiware-servicepath: /barragem01' \
   -d '{
  "services": [
    {
-     "apikey":      "chave_secreta_123",
+     "apikey":      "[SUA_API_KEY]",
      "cbroker":     "http://fiware-orion:1026",
      "entity_type": "Thing",
      "resource":    "/iot/json"
@@ -286,7 +286,7 @@ Cadastra o sensor e define o que ele mede (t = temperature, h = humidity).
 
 ```bash
 curl -iX POST \
-  'http://172.16.100.250:4041/iot/devices' \
+  'http://[IP_VM_DEBIAN]:4041/iot/devices' \
   -H 'Content-Type: application/json' \
   -H 'fiware-service: semarh' \
   -H 'fiware-servicepath: /barragem01' \
@@ -315,7 +315,7 @@ Avisa o Orion: "Toda vez que chegar dados de t e h em uma entidade do tipo Thing
 
 ```bash
 curl -k -iX POST \
-  'https://fiware-orion.semarh.lan/v2/subscriptions' \
+  'https://fiware-orion.[SEU_DOMINIO_INTERNO]/v2/subscriptions' \
   -H 'Content-Type: application/json' \
   -H 'fiware-service: semarh' \
   -H 'fiware-servicepath: /barragem01' \
@@ -357,7 +357,7 @@ Use seu IP Público (ou interno, se estiver testando localmente) e a porta 7896.
 
 ```bash
 curl -iX POST \
-  'http://206.42.28.182:7896/iot/json?k=chave_secreta_123&i=sensor_teste_final' \
+  'http://[IP_PUBLICO_PFSENSE]:7896/iot/json?k=[SUA_API_KEY]&i=sensor_teste_final' \
   -H 'Content-Type: application/json' \
   -d '{"t": 25.5, "h": 60}'
 ```
@@ -370,7 +370,7 @@ Esperado: HTTP/1.1 200 OK.
 Confere se o sistema recebeu e processou o último valor.
 
 ```bash
-curl -k -X GET 'https://fiware-orion.semarh.lan/v2/entities/Thing:sensor_teste_final?options=keyValues' \
+curl -k -X GET 'https://fiware-orion.[SEU_DOMINIO_INTERNO]/v2/entities/Thing:sensor_teste_final?options=keyValues' \
   -H 'fiware-service: semarh' \
   -H 'fiware-servicepath: /barragem01'
 ```
@@ -387,7 +387,7 @@ sudo docker exec -it crate-fiware crash -c "SELECT time_index, t, h FROM mtsemar
 Esperado: Uma tabela contendo a data e os valores 25.5 | 60.
 
 5. Visualização (Grafana)
-Acesse `https://fiware-grafana.semarh.lan`.
+Acesse `https://fiware-grafana.[SEU_DOMINIO_INTERNO]`.
 
 * Faça login (admin/admin).
 * Adicione uma fonte de dados (Data Source) do tipo PostgreSQL:
