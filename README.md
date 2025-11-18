@@ -1,4 +1,4 @@
-<img width="1448" height="774" alt="Ilustração da rede" src="https://github.com/user-attachments/assets/ac38196b-f48b-4614-8c8d-f513813c8d23" />
+<img width="1295" height="692" alt="Ilustração da rede" src="https://github.com/user-attachments/assets/a46165ae-1a1b-4503-9c65-de2196e35124" />
 
 Obs.: variáveis a serem alteradas:
 
