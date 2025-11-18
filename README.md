@@ -1,3 +1,5 @@
+<img width="1448" height="774" alt="Ilustração da rede" src="https://github.com/user-attachments/assets/ac38196b-f48b-4614-8c8d-f513813c8d23" />
+
 Obs.: variáveis a serem alteradas:
 
 | Exemplos                 | Para substituir          |
