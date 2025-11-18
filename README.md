@@ -3,7 +3,7 @@ Obs.: variáveis a serem alteradas:
 | Exemplos                 | Para substituir          |
 |--------------------------|--------------------------|
 | 203.0.113.1              | [IP_PUBLICO_PFSENSE]     |
-| 172.16.30.170            | [IP_VM_DEBIAN]           |
+| 172.16.100.X             | [IP_VM_DEBIAN]           |
 | dominio.lan              | [SEU_DOMINIO_INTERNO]    |
 | chavesecreta321          | [SUA_API_KEY]            |
 
@@ -189,7 +189,7 @@ Você precisará criar 5 registros, um para cada serviço, todos apontando para 
 * Clique em Adicionar Host.
 
 ### Passo 2: Configurar no PfSense (Opcional, mas Recomendado para a VLAN)
-Se os dispositivos na VLAN 172.16.100.0 usam o PfSense como DNS (e não o Windows Server), você também deve adicionar essas entradas no PfSense para que os dispositivos dessa rede consigam resolver os nomes (caso precisem se comunicar internamente via nome).
+Se os dispositivos na VLAN 172.16.100.X usam o PfSense como DNS (e não o Windows Server), você também deve adicionar essas entradas no PfSense para que os dispositivos dessa rede consigam resolver os nomes (caso precisem se comunicar internamente via nome).
 
 1. No PfSense, vá em Services > DNS Resolver (ou DNS Forwarder, dependendo do que você usa).
 2. Role até o final, na seção Host Overrides.
@@ -205,7 +205,7 @@ Se os dispositivos na VLAN 172.16.100.0 usam o PfSense como DNS (e não o Window
 5. Clique em Apply Changes no topo da página.
 
 ### Passo 3: Limpar Cache e Testar
-No seu computador na rede 192.168.0.x:
+No seu computador na rede 192.168.0.X:
 
 1. Abra o Prompt de Comando (CMD) ou PowerShell.
 2. Limpe o cache de DNS local:
