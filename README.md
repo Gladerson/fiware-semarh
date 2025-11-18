@@ -1,3 +1,13 @@
+Obs.: variáveis a serem alteradas:
+
+| Exemplos                 | Para substituir          |
+|--------------------------|--------------------------|
+| 203.0.113.1              | [IP_PUBLICO_PFSENSE]     |
+| 172.16.30.170            | [IP_VM_DEBIAN]           |
+| dominio.lan              | [SEU_DOMINIO_INTERNO]    |
+| chavesecreta321          | [SUA_API_KEY]            |
+
+
 # Fase 1: Preparação do Servidor (Debian 13)
 Estes comandos devem ser executados na sua nova VM ([IP_VM_DEBIAN]).
 
